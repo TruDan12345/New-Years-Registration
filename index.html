@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOL Church | New Year's Registration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="countdown-simple" role="status" aria-live="polite">
+      <p class="countdown-heading" data-i18n="countdownHeading">
+        New Year starts in
+      </p>
+      <p class="countdown-time" id="countdownTime">--:--:--</p>
+      <p class="countdown-value" id="countdownNumber">-- days</p>
+    </div>
+
+    <div class="page-shell">
+      <header class="hero">
+        <span class="hero__badge" data-i18n="heroBadge">
+          New Year's Celebration 2025-2026 Form
+        </span>
+      </header>
+
+      <form id="registrationForm" novalidate>
+        <fieldset>
+          <legend>
+            <span class="step-pill" data-i18n="step1Pill">Step 1</span>
+            <span data-i18n="step1Label">Primary Contact</span>
+          </legend>
+          <div class="fields-grid">
+            <label>
+              <span data-i18n="primaryFirstNameLabel">Primary First Name</span>
+              <input
+                type="text"
+                name="primaryFirstName"
+                id="primaryFirstName"
+                placeholder="First name"
+                required
+              />
+            </label>
+            <label>
+              <span data-i18n="lastNameLabel">Last Name</span>
+              <input
+                type="text"
+                name="primaryLastName"
+                id="primaryLastName"
+                placeholder="Last name"
+                required
+              />
+            </label>
+            <label>
+              <span data-i18n="mobilePhoneLabel">Mobile Phone</span>
+              <input
+                type="tel"
+                name="phone"
+                id="phone"
+                placeholder="Phone number"
+                pattern="[0-9()+\-\s]{10,}"
+                required
+              />
+            </label>
+            <label>
+              <span data-i18n="spouseFirstNameLabel">Spouse First Name</span>
+              <input
+                type="text"
+                name="spouseFirstName"
+                id="spouseFirstName"
+                placeholder="First name"
+              />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>
+            <span class="step-pill" data-i18n="step2Pill">Step 2</span>
+            <span data-i18n="step2Label">Attendance Details</span>
+          </legend>
+          <p class="legend-subtext" data-i18n="step2Subtext">
+            Adults are 13+, children are under 13. Adjust totals for everyone
+            coming with you.
+          </p>
+          <div class="attendance-grid">
+            <label>
+              <span data-i18n="adultsFieldLabel">Adults (13+)</span>
+              <input
+                type="number"
+                id="adultCount"
+                name="adultCount"
+                min="1"
+                value="1"
+                required
+              />
+            </label>
+            <label>
+              <span data-i18n="childrenFieldLabel">Children (0-12)</span>
+              <input
+                type="number"
+                id="childCount"
+                name="childCount"
+                min="0"
+                value="0"
+              />
+            </label>
+          </div>
+          <p class="helper-text" data-i18n="priceNote">Adults $30 / Kids $15.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>
+            <span class="step-pill" data-i18n="step3Pill">Step 3</span>
+            <span data-i18n="step3Label">First Names</span>
+          </legend>
+          <p class="legend-subtext" data-i18n="step3Subtext">
+            Please enter the first name of each attendee.
+          </p>
+
+          <div id="adultTable" class="attendee-table">
+            <h3 data-i18n="adultTableHeading">Adult First Names</h3>
+            <div class="grid-two" id="adultList"></div>
+          </div>
+
+          <div id="childTable" class="attendee-table" style="display: none">
+            <h3 data-i18n="childTableHeading">Child First Names</h3>
+            <p data-i18n="childTableNote">
+              We'll have something special for each child. List them here.
+            </p>
+            <div class="grid-two" id="childList"></div>
+          </div>
+        </fieldset>
+
+        <div class="submit-panel">
+          <button type="submit" data-i18n="submitButton">Submit Registration</button>
+          <p id="status" class="status-message"></p>
+        </div>
+      </form>
+
+      <section id="successPanel">
+        <p class="success-mono" data-i18n="successMessage">
+          Form successfully submitted.
+        </p>
+        <p class="success-mono">
+          <span data-i18n="successTotalLabel">Your total is</span>
+          <span id="successTotal">$0.00</span>
+        </p>
+        <div class="qr-grid">
+          <div class="qr-box" data-i18n="qrPlaceholder1">QR Placeholder</div>
+          <div class="qr-box" data-i18n="qrPlaceholder2">QR Placeholder</div>
+          <div class="qr-box" data-i18n="qrPlaceholder3">QR Placeholder</div>
+        </div>
+      </section>
+
+      <section id="paymentSection">
+        <h2 data-i18n="paymentHeading">
+          Submitted! You will be approved after payment.
+        </h2>
+        <p data-i18n="paymentDescription">
+          Thank you for registering. To finalize your family reservation, please send your payment right away using one of the options below. Include the memo so we can match it quickly.
+        </p>
+        <ul>
+          <li>
+            <span data-i18n="paymentZelleLabel">Zelle</span>:
+            <strong>finance@solchurch.org</strong>
+          </li>
+          <li>
+            <span data-i18n="paymentCashAppLabel">Cash App</span>:
+            <strong>$SOLChurch</strong>
+          </li>
+          <li>
+            <span data-i18n="paymentMemoLabel">Memo</span>:
+            <strong>"NYE Registration" + Primary Last Name</strong>
+          </li>
+        </ul>
+      </section>
+    </div>
+
+  <script src="main.js" defer data-script-url="https://script.google.com/macros/s/AKfycbw4xT43WFlN_vDAvC3jbKkUQayJibbZpJHz_g7xEn_BEl_ZpbYQX3bbbeJYhR2M-aY9/exec"></script>
+  </body>
+</html>
