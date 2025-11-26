@@ -1,7 +1,7 @@
 const COSTS = { adult: 30, child: 15 };
 const TRANSLATIONS = {
   en: {
-    countdownHeading: "New Year starts in",
+    countdownHeading: "New Year starts inn",
     heroBadge: "New Year's Celebration 2025-2026 Form",
     step1Pill: "Step 1",
     step1Label: "Primary Contact",
