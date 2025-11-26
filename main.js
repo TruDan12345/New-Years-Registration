@@ -231,7 +231,7 @@ const scriptURL =
   document
     .querySelector('script[src$="main.js"]')
     ?.getAttribute("data-script-url") ||
-  "https://script.google.com/macros/s/AKfycbw4xT43WFlN_vDAvC3jbKkUQayJibbZpJHz_g7xEn_BEl_ZpbYQX3bbbeJYhR2M-aY9/exec";
+  "https://script.google.com/macros/s/AKfycbw_JDG5geTEOLX_N-QI5VJR9Seu8egaFokBIX6-c3FOF3dDOOd5IgdAnhG9-oh9XWGX/exec";
 
 const getFirstName = (value) => value.trim().split(/\s+/)[0] || "";
 
@@ -391,8 +391,6 @@ form.addEventListener("submit", async (event) => {
   try {
     const response = await fetch(scriptURL, {
       method: "POST",
-      mode: "cors",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
