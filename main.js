@@ -1,7 +1,7 @@
 const COSTS = { adult: 30, child: 15 };
 const TRANSLATIONS = {
   en: {
-    countdownHeading: "New Year starts inn",
+    countdownHeading: "New Year starts in",
     heroBadge: "New Year's Celebration 2025-2026 Form",
     step1Pill: "Step 1",
     step1Label: "Primary Contact",
@@ -231,7 +231,7 @@ const scriptURL =
   document
     .querySelector('script[src$="main.js"]')
     ?.getAttribute("data-script-url") ||
-  "https://script.google.com/macros/s/AKfycbx-cjthU_I8okJMBEpUZOtr0Ooo8ssbYa6YvZiVhy_hFb54k5775i9i0qzk8o3zlIjS/exec";
+  "https://script.google.com/macros/s/AKfycbyi8aclCfluytTOIrV7UM7s3HYudnyHR6fwxbr6Q-Rk1Vgsmc10JLChft3T0uoNXZLv/exec";
 
 const getFirstName = (value) => value.trim().split(/\s+/)[0] || "";
 
