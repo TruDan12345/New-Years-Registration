@@ -231,7 +231,7 @@ const scriptURL =
   document
     .querySelector('script[src$="main.js"]')
     ?.getAttribute("data-script-url") ||
-  "https://script.google.com/macros/s/AKfycbzbHePJXqcSVSBKLl1lzvgK2Lc8tMhTBHVrvS_4QePzET8bg57MLQqJpF192bYIeiFG/exec";
+  "https://script.google.com/macros/s/AKfycbzaam2RGLCZbPWbq9nX3FTG0UmWwQkbLwh3w1zOygHzIPc2ztO_Brx1oeCEJ9oU0QbM/exec";
 
 const getFirstName = (value) => value.trim().split(/\s+/)[0] || "";
 
