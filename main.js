@@ -35,9 +35,16 @@ const TRANSLATIONS = {
     daysLabel: "days",
     successMessage: "Form successfully submitted.",
     successTotalLabel: "Your total is",
-    qrPlaceholder1: "QR Placeholder",
-    qrPlaceholder2: "QR Placeholder",
-    qrPlaceholder3: "QR Placeholder",
+    cardPaymentEyebrow: "Secure card payment",
+    cardPaymentTitle: "Pay by card with Stripe",
+    cardPaymentCopy: "Use the tabs to pay with card or wallet. Powered by Stripe.",
+    cardPaymentDueLabel: "Amount due",
+    payButtonLabel: "Pay now",
+    payButtonProcessing: "Processing...",
+    paymentReadyNote: "Card form is ready. Your details are encrypted by Stripe.",
+    paymentUnavailable: "Card payments are unavailable right now. Please use another option.",
+    paymentSuccess: "Payment received! You're all set.",
+    paymentMissingKey: "Stripe is not configured. Please contact the organizer.",
   },
   es: {
     countdownHeading: "El Año Nuevo comienza en",
@@ -74,9 +81,16 @@ const TRANSLATIONS = {
     daysLabel: "días",
     successMessage: "Formulario enviado con éxito.",
     successTotalLabel: "Tu total es",
-    qrPlaceholder1: "QR Próximamente",
-    qrPlaceholder2: "QR Próximamente",
-    qrPlaceholder3: "QR Próximamente",
+    cardPaymentEyebrow: "Pago con tarjeta seguro",
+    cardPaymentTitle: "Paga con tarjeta con Stripe",
+    cardPaymentCopy: "Usa las pestañas para pagar con tarjeta o wallet. Impulsado por Stripe.",
+    cardPaymentDueLabel: "Monto a pagar",
+    payButtonLabel: "Pagar ahora",
+    payButtonProcessing: "Procesando...",
+    paymentReadyNote: "El formulario está listo. Tus datos están cifrados por Stripe.",
+    paymentUnavailable: "Los pagos con tarjeta no están disponibles. Usa otra opción.",
+    paymentSuccess: "¡Pago recibido! Todo listo.",
+    paymentMissingKey: "Stripe no está configurado. Contacta al organizador.",
   },
   ru: {
     countdownHeading: "До Нового года осталось",
@@ -113,9 +127,17 @@ const TRANSLATIONS = {
     daysLabel: "дней",
     successMessage: "Форма успешно отправлена.",
     successTotalLabel: "Ваш итог",
-    qrPlaceholder1: "QR позже",
-    qrPlaceholder2: "QR позже",
-    qrPlaceholder3: "QR позже",
+    cardPaymentEyebrow: "Безопасная оплата картой",
+    cardPaymentTitle: "Оплатите картой через Stripe",
+    cardPaymentCopy:
+      "Используйте вкладки, чтобы оплатить картой или кошельком. Обработку выполняет Stripe.",
+    cardPaymentDueLabel: "Сумма к оплате",
+    payButtonLabel: "Оплатить",
+    payButtonProcessing: "Обработка...",
+    paymentReadyNote: "Форма оплаты готова. Ваши данные шифруются Stripe.",
+    paymentUnavailable: "Оплата картой сейчас недоступна. Выберите другой способ.",
+    paymentSuccess: "Платеж получен! Все готово.",
+    paymentMissingKey: "Stripe не настроен. Свяжитесь с организатором.",
   },
   uk: {
     countdownHeading: "До Нового року залишилося",
@@ -152,9 +174,17 @@ const TRANSLATIONS = {
     daysLabel: "днів",
     successMessage: "Форму успішно надіслано.",
     successTotalLabel: "Ваш підсумок",
-    qrPlaceholder1: "QR незабаром",
-    qrPlaceholder2: "QR незабаром",
-    qrPlaceholder3: "QR незабаром",
+    cardPaymentEyebrow: "Безпечна оплата карткою",
+    cardPaymentTitle: "Оплатіть карткою через Stripe",
+    cardPaymentCopy:
+      "Скористайтесь вкладками для оплати карткою чи гаманцем. Обробка від Stripe.",
+    cardPaymentDueLabel: "Сума до оплати",
+    payButtonLabel: "Сплатити",
+    payButtonProcessing: "Обробка...",
+    paymentReadyNote: "Форма оплати готова. Ваші дані шифрує Stripe.",
+    paymentUnavailable: "Оплата карткою зараз недоступна. Скористайтесь іншим способом.",
+    paymentSuccess: "Платіж отримано! Все готово.",
+    paymentMissingKey: "Stripe не налаштований. Зв'яжіться з організатором.",
   },
 };
 
@@ -198,6 +228,18 @@ const spouseFirstNameEl = document.getElementById("spouseFirstName");
 const phoneInput = document.getElementById("phone");
 const countdownNumberEl = document.getElementById("countdownNumber");
 const countdownTimeEl = document.getElementById("countdownTime");
+const paymentForm = document.getElementById("paymentForm");
+const payButton = document.getElementById("payNowButton");
+const paymentStatusEl = document.getElementById("paymentStatus");
+const paymentElementContainer = document.getElementById("payment-element");
+const cardTotalEl = document.getElementById("cardTotal");
+const cardPaymentPanel = document.getElementById("cardPayment");
+
+let stripeInstance = null;
+let stripeElements = null;
+let stripePaymentElement = null;
+let activeClientSecret = null;
+let activePublishableKey = "";
 
 const requiredFields = [
   { input: primaryFirstNameEl, key: "primaryFirstNameRequired" },
@@ -227,11 +269,189 @@ requiredFields.forEach(({ input }) => {
   input.addEventListener("input", () => input.setCustomValidity(""));
 });
 
-const scriptURL =
-  document
-    .querySelector('script[src$="main.js"]')
-    ?.getAttribute("data-script-url") ||
+const mainScriptTag = document.querySelector('script[src$="main.js"]');
+const scriptURL = mainScriptTag?.getAttribute("data-script-url") ||
   "https://script.google.com/macros/s/AKfycbyOg74u_9FGi_Cc7XZ0ttL_xzUM4_czFse6dd5TdoDRZCpZJwMt8pWk38T168K2QVk/exec";
+const stripePublishableKey =
+  (mainScriptTag?.getAttribute("data-stripe-publishable-key") || "").trim();
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat(activeLocale, { style: "currency", currency: "USD" }).format(
+    Number(value) || 0
+  );
+
+const updateTotalDisplays = (value) => {
+  const formatted = formatCurrency(value);
+  if (successTotalEl) {
+    successTotalEl.textContent = formatted;
+  }
+  if (cardTotalEl) {
+    cardTotalEl.textContent = formatted;
+  }
+};
+
+const showPaymentStatus = (message, type = "") => {
+  if (!paymentStatusEl) return;
+  paymentStatusEl.textContent = message;
+  paymentStatusEl.className = `status-message${type ? ` ${type}` : ""}`;
+  paymentStatusEl.style.display = "block";
+};
+
+const resetPaymentUI = () => {
+  activeClientSecret = null;
+  if (stripePaymentElement) {
+    stripePaymentElement.unmount();
+    stripePaymentElement.destroy();
+    stripePaymentElement = null;
+  }
+  if (payButton) {
+    payButton.disabled = true;
+    payButton.textContent = getString("payButtonLabel") || "Pay now";
+  }
+  if (paymentStatusEl) {
+    paymentStatusEl.textContent = "";
+    paymentStatusEl.className = "status-message";
+    paymentStatusEl.style.display = "none";
+  }
+};
+
+const getPublishableKey = () => {
+  const keyCandidate =
+    stripePublishableKey ||
+    (typeof window !== "undefined" ? window.STRIPE_PUBLISHABLE_KEY : "") ||
+    "";
+  return typeof keyCandidate === "string" ? keyCandidate.trim() : "";
+};
+
+const initializeStripePayment = async (clientSecret, totalCostValue, paymentErrorMessage) => {
+  if (!cardPaymentPanel || !paymentElementContainer || !payButton) return;
+  resetPaymentUI();
+  cardPaymentPanel.style.display = "block";
+
+  if (paymentErrorMessage) {
+    showPaymentStatus(paymentErrorMessage, "error");
+    return;
+  }
+
+  if (!clientSecret) {
+    showPaymentStatus(
+      getString("paymentUnavailable") || "Card payments are unavailable right now.",
+      "error"
+    );
+    return;
+  }
+
+  if (cardTotalEl) {
+    cardTotalEl.textContent = formatCurrency(totalCostValue);
+  }
+
+  const publishableKey = getPublishableKey();
+  if (!publishableKey) {
+    showPaymentStatus(
+      getString("paymentMissingKey") || "Stripe is not configured. Please contact us.",
+      "error"
+    );
+    return;
+  }
+
+  if (typeof Stripe === "undefined") {
+    showPaymentStatus(
+      getString("paymentUnavailable") || "Card payments are unavailable right now.",
+      "error"
+    );
+    return;
+  }
+
+  if (!stripeInstance || activePublishableKey !== publishableKey) {
+    stripeInstance = Stripe(publishableKey);
+    activePublishableKey = publishableKey;
+  }
+
+  stripeElements = stripeInstance.elements({
+    clientSecret,
+    appearance: { theme: "stripe" },
+  });
+  stripePaymentElement = stripeElements.create("payment", { layout: "tabs" });
+  stripePaymentElement.mount("#payment-element");
+  activeClientSecret = clientSecret;
+  payButton.disabled = false;
+  showPaymentStatus(
+    getString("paymentReadyNote") ||
+      "Card form ready. Payments are securely processed by Stripe.",
+    "success"
+  );
+};
+
+const confirmStripePayment = async () => {
+  if (!stripeInstance || !stripeElements || !stripePaymentElement || !activeClientSecret) {
+    showPaymentStatus(
+      getString("paymentUnavailable") || "Card payments are unavailable right now.",
+      "error"
+    );
+    return;
+  }
+
+  if (payButton) {
+    payButton.disabled = true;
+    payButton.textContent = getString("payButtonProcessing") || "Processing...";
+  }
+  showPaymentStatus(getString("payButtonProcessing") || "Processing...");
+
+  let confirmationResult;
+  try {
+    confirmationResult = await stripeInstance.confirmPayment({
+      elements: stripeElements,
+      confirmParams: {
+        return_url: window.location.href,
+      },
+      redirect: "if_required",
+    });
+  } catch (err) {
+    showPaymentStatus(
+      err.message || "Payment could not be completed.",
+      "error"
+    );
+    if (payButton) {
+      payButton.disabled = false;
+      payButton.textContent = getString("payButtonLabel") || "Pay now";
+    }
+    return;
+  }
+
+  const { error, paymentIntent } = confirmationResult;
+
+  if (error) {
+    showPaymentStatus(error.message || "Payment could not be completed.", "error");
+    if (payButton) {
+      payButton.disabled = false;
+      payButton.textContent = getString("payButtonLabel") || "Pay now";
+    }
+    return;
+  }
+
+  if (
+    paymentIntent &&
+    (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")
+  ) {
+    showPaymentStatus(
+      getString("paymentSuccess") || "Payment received! You're all set.",
+      "success"
+    );
+    if (payButton) {
+      payButton.disabled = true;
+      payButton.textContent = getString("paymentSuccess") || "Payment received";
+    }
+  } else {
+    showPaymentStatus(
+      getString("paymentUnavailable") || "Card payments are unavailable right now.",
+      "error"
+    );
+    if (payButton) {
+      payButton.disabled = false;
+      payButton.textContent = getString("payButtonLabel") || "Pay now";
+    }
+  }
+};
 
 const getFirstName = (value) => value.trim().split(/\s+/)[0] || "";
 
@@ -353,12 +573,19 @@ childInput.addEventListener("input", () => {
   if (childInput.value === "") return;
   buildNameInputs();
 });
+if (payButton) {
+  payButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    confirmStripePayment();
+  });
+}
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   statusEl.style.display = "none";
   statusEl.textContent = "";
   statusEl.className = "status-message";
+  resetPaymentUI();
 
   if (!validateRequiredFields()) {
     return;
@@ -391,15 +618,25 @@ form.addEventListener("submit", async (event) => {
   try {
     const response = await fetch(scriptURL, {
       method: "POST",
-      mode: "no-cors",
       headers: {
-        "Content-Type": "text/plain;charset=utf-8",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok && response.type !== "opaque") {
+    if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
+    }
+
+    let responseData = {};
+    try {
+      responseData = await response.json();
+    } catch (parseError) {
+      throw new Error("Unable to read server response.");
+    }
+
+    if (responseData.status !== "ok") {
+      throw new Error(responseData.message || "Submission failed.");
     }
 
     form.reset();
@@ -411,19 +648,18 @@ form.addEventListener("submit", async (event) => {
     statusEl.className = "status-message";
     statusEl.style.display = "none";
 
-    if (successTotalEl) {
-      const formattedTotal = new Intl.NumberFormat(activeLocale, {
-        style: "currency",
-        currency: "USD",
-      }).format(totalCostValue);
-      successTotalEl.textContent = formattedTotal;
-    }
+    updateTotalDisplays(totalCostValue);
     if (successPanel) {
       successPanel.style.display = "block";
     }
 
     paymentSection.style.display = "block";
     form.style.display = "none";
+    await initializeStripePayment(
+      responseData.clientSecret,
+      totalCostValue,
+      responseData.paymentError
+    );
   } catch (err) {
     console.error(err);
     statusEl.textContent = "Something went wrong. Please try again or contact us.";
@@ -432,6 +668,7 @@ form.addEventListener("submit", async (event) => {
     if (successPanel) {
       successPanel.style.display = "none";
     }
+    resetPaymentUI();
   }
 });
 

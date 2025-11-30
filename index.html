@@ -160,10 +160,31 @@
           <span data-i18n="successTotalLabel">Your total is</span>
           <span id="successTotal">$0.00</span>
         </p>
-        <div class="qr-grid">
-          <div class="qr-box" data-i18n="qrPlaceholder1">QR Placeholder</div>
-          <div class="qr-box" data-i18n="qrPlaceholder2">QR Placeholder</div>
-          <div class="qr-box" data-i18n="qrPlaceholder3">QR Placeholder</div>
+        <div id="cardPayment" class="card-payment">
+          <div class="card-payment__header">
+            <div>
+              <p class="card-payment__eyebrow" data-i18n="cardPaymentEyebrow">
+                Secure card payment
+              </p>
+              <h3 class="card-payment__title" data-i18n="cardPaymentTitle">
+                Pay by card with Stripe
+              </h3>
+              <p class="card-payment__copy" data-i18n="cardPaymentCopy">
+                Use the tabs to pay with card or wallet. Powered by Stripe.
+              </p>
+            </div>
+            <div class="card-payment__pill">
+              <span data-i18n="cardPaymentDueLabel">Amount due</span>
+              <strong id="cardTotal">$0.00</strong>
+            </div>
+          </div>
+          <form id="paymentForm" class="payment-form">
+            <div id="payment-element" class="payment-element"></div>
+            <button type="button" id="payNowButton" data-i18n="payButtonLabel">
+              Pay now
+            </button>
+            <p id="paymentStatus" class="status-message"></p>
+          </form>
         </div>
       </section>
 
@@ -191,6 +212,12 @@
       </section>
     </div>
 
-  <script src="main.js" defer data-script-url="https://script.google.com/macros/s/AKfycbyOg74u_9FGi_Cc7XZ0ttL_xzUM4_czFse6dd5TdoDRZCpZJwMt8pWk38T168K2QVk/exec"></script>
+  <script src="https://js.stripe.com/v3" defer></script>
+  <script
+    src="main.js"
+    defer
+    data-script-url="https://script.google.com/macros/s/AKfycbyOg74u_9FGi_Cc7XZ0ttL_xzUM4_czFse6dd5TdoDRZCpZJwMt8pWk38T168K2QVk/exec"
+    data-stripe-publishable-key=""
+  ></script>
   </body>
 </html>
