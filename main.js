@@ -219,7 +219,6 @@ const adultList = document.getElementById("adultList");
 const childList = document.getElementById("childList");
 const childTable = document.getElementById("childTable");
 const statusEl = document.getElementById("status");
-const paymentSection = document.getElementById("paymentSection");
 const successPanel = document.getElementById("successPanel");
 const successTotalEl = document.getElementById("successTotal");
 const primaryFirstNameEl = document.getElementById("primaryFirstName");
@@ -619,7 +618,7 @@ form.addEventListener("submit", async (event) => {
     const response = await fetch(scriptURL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain;charset=utf-8",
       },
       body: JSON.stringify(payload),
     });
@@ -653,7 +652,6 @@ form.addEventListener("submit", async (event) => {
       successPanel.style.display = "block";
     }
 
-    paymentSection.style.display = "block";
     form.style.display = "none";
     await initializeStripePayment(
       responseData.clientSecret,
