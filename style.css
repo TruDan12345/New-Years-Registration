@@ -55,6 +55,8 @@ a {
 }
 
 .star--left {
+  width: 28px;
+  height: 28px;
   transform: translateY(-30px);
 }
 
