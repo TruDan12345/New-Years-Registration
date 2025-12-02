@@ -35,7 +35,7 @@ a {
   position: relative;
   height: 260px;
   margin-top: -220px;
-  margin-bottom: clamp(-8px, -2vw, 14px);
+  margin-bottom: clamp(24px, 6vw, 46px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,6 +62,39 @@ a {
 
 .star--right {
   transform: translateY(-10px);
+}
+
+.countdown-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.star--count-left {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  left: 12%;
+  top: 44%;
+  opacity: 0.85;
+}
+
+.star--count-right {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  right: 12%;
+  top: 44%;
+  opacity: 0.85;
+}
+
+.star--count-top {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  right: 16%;
+  top: -8%;
+  opacity: 0.82;
 }
 
 .wallpaper-hero {
@@ -168,7 +201,7 @@ h1 {
   z-index: 4;
   width: 100%;
   max-width: 900px;
-  margin: clamp(-28px, -6vw, -14px) auto clamp(1.4rem, 5vw, 2.3rem);
+  margin: clamp(-28px, -8vw, -16px) auto clamp(0.6rem, 3vw, 1.5rem);
   padding: 0;
   border-radius: 0;
   background: none;
@@ -182,18 +215,19 @@ h1 {
   margin: 0;
   font-weight: 700;
   text-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+  padding: clamp(0.9rem, 3vw, 1.3rem) 0;
 }
 
 .countdown-heading {
   margin: 0;
-  font-size: clamp(1rem, 3vw, 1.3rem);
+  font-size: clamp(1rem, 3vw, 1.25rem);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   opacity: 0.9;
 }
 
 .countdown-time {
-  margin: 0.45rem 0 0;
+  margin: 0.35rem 0 0;
   font-size: clamp(2.4rem, 8vw, 3.8rem);
   font-weight: 400;
   font-family: "Cinzel Decorative", "Cinzel", serif;
@@ -201,8 +235,8 @@ h1 {
 }
 
 .countdown-value {
-  margin: 0.25rem 0 0.35rem;
-  font-size: clamp(1.6rem, 5vw, 2.3rem);
+  margin: 0.1rem 0 0.2rem;
+  font-size: clamp(1.5rem, 4.6vw, 2.15rem);
   font-family: "Cinzel Decorative", "Cinzel", serif;
   font-weight: 400;
   letter-spacing: 0.04em;
@@ -542,7 +576,7 @@ button:active {
   }
 
   .countdown-banner {
-    margin: clamp(-14px, -6vw, -6px) auto clamp(1rem, 5vw, 1.6rem);
+    margin: clamp(-120px, -32vw, -88px) auto clamp(0.5rem, 4vw, 1rem);
   }
 
   .page-shell {
