@@ -10,34 +10,31 @@
       href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <section class="wallpaper-hero">
-      <div class="wallpaper-hero__content">
-        <div class="countdown-simple" role="status" aria-live="polite">
-          <p class="countdown-heading" data-i18n="countdownHeading">
-            New Year starts in
-          </p>
-          <p class="countdown-time" id="countdownTime">--:--:--</p>
-          <p class="countdown-value" id="countdownNumber">-- days</p>
-        </div>
-
-        <header class="hero">
-          <span class="hero__badge" data-i18n="heroBadge">
-            New Year's Celebration 2025-2026 Form
-          </span>
-        </header>
-      </div>
-    </section>
+    <section class="wallpaper-hero" aria-hidden="true"></section>
 
     <div class="star-band" aria-hidden="true">
       <span class="star star--left"></span>
       <span class="star star--right"></span>
     </div>
 
-    <div class="page-shell">
+    <section class="countdown-banner" aria-label="Countdown to the New Year">
+      <div class="countdown-simple" role="status" aria-live="polite">
+        <p class="countdown-heading" data-i18n="countdownHeading">
+          New Year starts in
+        </p>
+        <p class="countdown-time" id="countdownTime">--:--:--</p>
+        <p class="countdown-value" id="countdownNumber">-- days</p>
+      </div>
+    </section>
 
+    <div class="page-shell">
       <form id="registrationForm" novalidate>
         <fieldset>
           <legend>
