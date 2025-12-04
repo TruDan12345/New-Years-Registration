@@ -366,12 +366,22 @@ const initializeStripePayment = async (clientSecret, totalCostValue, paymentErro
     activePublishableKey = publishableKey;
   }
 
+  const loader = document.getElementById("payment-loader");
+  if (loader) loader.style.display = "block";
+  if (paymentElementContainer) paymentElementContainer.style.display = "none";
+
   stripeElements = stripeInstance.elements({
     clientSecret,
     appearance: { theme: "stripe" },
   });
   stripePaymentElement = stripeElements.create("payment", { layout: "tabs" });
   stripePaymentElement.mount("#payment-element");
+
+  stripePaymentElement.on("ready", () => {
+    if (loader) loader.style.display = "none";
+    if (paymentElementContainer) paymentElementContainer.style.display = "block";
+  });
+
   activeClientSecret = clientSecret;
   payButton.disabled = false;
 
@@ -606,6 +616,10 @@ form.addEventListener("submit", async (event) => {
     timestamp: new Date().toISOString(),
   };
 
+  // Show spinner
+  const submitLoader = document.getElementById("submit-loader");
+  if (submitLoader) submitLoader.style.display = "block";
+
   statusEl.textContent = "Submitting...";
   statusEl.classList.add("helper-text");
   statusEl.style.display = "block";
@@ -663,6 +677,9 @@ form.addEventListener("submit", async (event) => {
       successPanel.style.display = "none";
     }
     resetPaymentUI();
+  } finally {
+    // Hide spinner
+    if (submitLoader) submitLoader.style.display = "none";
   }
 });
 

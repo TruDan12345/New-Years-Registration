@@ -109,6 +109,7 @@
 
       <div class="submit-panel">
         <button type="submit" data-i18n="submitButton">Submit Registration</button>
+        <div id="submit-loader" class="spinner"></div>
         <p id="status" class="status-message"></p>
       </div>
     </form>
@@ -133,6 +134,7 @@
           </div>
         </div>
         <form id="paymentForm" class="payment-form">
+          <div id="payment-loader" class="spinner"></div>
           <div id="payment-element" class="payment-element"></div>
           <button type="button" id="payNowButton" data-i18n="payButtonLabel">
             Pay now
