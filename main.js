@@ -374,7 +374,17 @@ const initializeStripePayment = async (clientSecret, totalCostValue, paymentErro
     clientSecret,
     appearance: { theme: "stripe" },
   });
-  stripePaymentElement = stripeElements.create("payment", { layout: "tabs" });
+
+  const expressCheckoutElement = stripeElements.create("expressCheckout");
+  expressCheckoutElement.mount("#express-checkout-element");
+
+  stripePaymentElement = stripeElements.create("payment", {
+    layout: "tabs",
+    wallets: {
+      applePay: "never",
+      googlePay: "never",
+    }
+  });
   stripePaymentElement.mount("#payment-element");
 
   stripePaymentElement.on("ready", () => {
