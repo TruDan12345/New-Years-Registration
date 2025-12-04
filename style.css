@@ -709,6 +709,10 @@ button:active {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .final-success-text {
