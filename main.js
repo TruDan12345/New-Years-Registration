@@ -448,14 +448,16 @@ const confirmStripePayment = async () => {
     paymentIntent &&
     (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")
   ) {
-    showPaymentStatus(
-      getString("paymentSuccess") || "Payment received! You're all set.",
-      "success"
-    );
-    if (payButton) {
-      payButton.disabled = true;
-      payButton.textContent = getString("paymentSuccess") || "Payment received";
-    }
+    // Hide the payment form
+    if (successPanel) successPanel.style.display = "none";
+
+    // Show the final success screen
+    const finalSuccess = document.getElementById("finalSuccess");
+    if (finalSuccess) finalSuccess.style.display = "block";
+
+    // Scroll to it
+    if (finalSuccess) finalSuccess.scrollIntoView({ behavior: "smooth" });
+
   } else {
     showPaymentStatus(
       getString("paymentUnavailable") || "Card payments are unavailable right now.",
