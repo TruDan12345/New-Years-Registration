@@ -1,195 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SOL Church | New Year's Registration</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <section class="wallpaper-hero" aria-hidden="true"></section>
 
-    <div class="star-band" aria-hidden="true">
-      <span class="star star--left"></span>
-      <span class="star star--right"></span>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOL Church | New Year's Registration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <section class="wallpaper-hero" aria-hidden="true"></section>
+
+  <div class="star-band" aria-hidden="true">
+    <span class="star star--left"></span>
+    <span class="star star--right"></span>
+  </div>
+
+  <section class="countdown-banner" aria-label="Countdown to the New Year">
+    <div class="countdown-stars" aria-hidden="true">
+      <span class="star star--count-left"></span>
+      <span class="star star--count-right"></span>
+      <span class="star star--count-top"></span>
     </div>
+    <div class="countdown-simple" role="status" aria-live="polite">
+      <p class="countdown-heading" data-i18n="countdownHeading">
+        New Year starts in
+      </p>
+      <p class="countdown-time" id="countdownTime">--:--:--</p>
+      <p class="countdown-value" id="countdownNumber">-- days</p>
+    </div>
+  </section>
 
-    <section class="countdown-banner" aria-label="Countdown to the New Year">
-      <div class="countdown-stars" aria-hidden="true">
-        <span class="star star--count-left"></span>
-        <span class="star star--count-right"></span>
-        <span class="star star--count-top"></span>
-      </div>
-      <div class="countdown-simple" role="status" aria-live="polite">
-        <p class="countdown-heading" data-i18n="countdownHeading">
-          New Year starts in
+  <div class="page-shell">
+    <form id="registrationForm" novalidate>
+      <fieldset>
+        <legend>
+          <span class="step-pill" data-i18n="step1Pill">Step 1</span>
+          <span data-i18n="step1Label">Primary Contact</span>
+        </legend>
+        <div class="fields-grid">
+          <label>
+            <span data-i18n="primaryFirstNameLabel">Primary First Name</span>
+            <input type="text" name="primaryFirstName" id="primaryFirstName" placeholder="First name" required />
+          </label>
+          <label>
+            <span data-i18n="lastNameLabel">Last Name</span>
+            <input type="text" name="primaryLastName" id="primaryLastName" placeholder="Last name" required />
+          </label>
+          <label>
+            <span data-i18n="mobilePhoneLabel">Mobile Phone</span>
+            <input type="tel" name="phone" id="phone" placeholder="Phone number" pattern="[0-9()+\-\s]{10,}" required />
+          </label>
+          <label>
+            <span data-i18n="spouseFirstNameLabel">Spouse First Name</span>
+            <input type="text" name="spouseFirstName" id="spouseFirstName" placeholder="First name" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>
+          <span class="step-pill" data-i18n="step2Pill">Step 2</span>
+          <span data-i18n="step2Label">Attendance Details</span>
+        </legend>
+        <p class="legend-subtext" data-i18n="step2Subtext">
+          Adults are 13+, children are under 13. Adjust totals for everyone
+          coming with you.
         </p>
-        <p class="countdown-time" id="countdownTime">--:--:--</p>
-        <p class="countdown-value" id="countdownNumber">-- days</p>
+        <div class="attendance-grid">
+          <label>
+            <span data-i18n="adultsFieldLabel">Adults (13+)</span>
+            <input type="number" id="adultCount" name="adultCount" min="1" value="1" required />
+          </label>
+          <label>
+            <span data-i18n="childrenFieldLabel">Children (0-12)</span>
+            <input type="number" id="childCount" name="childCount" min="0" value="0" />
+          </label>
+        </div>
+        <p class="helper-text" data-i18n="priceNote">Adults $30 / Kids $15.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>
+          <span class="step-pill" data-i18n="step3Pill">Step 3</span>
+          <span data-i18n="step3Label">First Names</span>
+        </legend>
+        <p class="legend-subtext" data-i18n="step3Subtext">
+          Please enter the first name of each attendee.
+        </p>
+
+        <div id="adultTable" class="attendee-table">
+          <h3 data-i18n="adultTableHeading">Adult First Names</h3>
+          <div class="grid-two" id="adultList"></div>
+        </div>
+
+        <div id="childTable" class="attendee-table" style="display: none">
+          <h3 data-i18n="childTableHeading">Child First Names</h3>
+          <p data-i18n="childTableNote">
+            We'll have something special for each child. List them here.
+          </p>
+          <div class="grid-two" id="childList"></div>
+        </div>
+      </fieldset>
+
+      <div class="submit-panel">
+        <button type="submit" data-i18n="submitButton">Submit Registration</button>
+        <p id="status" class="status-message"></p>
+      </div>
+    </form>
+
+    <section id="successPanel">
+      <div id="cardPayment" class="card-payment">
+        <div class="card-payment__header">
+          <div>
+            <p class="card-payment__eyebrow" data-i18n="cardPaymentEyebrow">
+              Secure card payment
+            </p>
+            <h3 class="card-payment__title" data-i18n="cardPaymentTitle">
+              Pay by card with Stripe
+            </h3>
+            <p class="card-payment__copy" data-i18n="cardPaymentCopy">
+              Use the tabs to pay with card or wallet. Powered by Stripe.
+            </p>
+          </div>
+          <div class="card-payment__pill">
+            <span data-i18n="cardPaymentDueLabel">Amount due</span>
+            <strong id="cardTotal">$0.00</strong>
+          </div>
+        </div>
+        <form id="paymentForm" class="payment-form">
+          <div id="payment-element" class="payment-element"></div>
+          <button type="button" id="payNowButton" data-i18n="payButtonLabel">
+            Pay now
+          </button>
+          <p id="paymentStatus" class="status-message"></p>
+        </form>
       </div>
     </section>
-
-    <div class="page-shell">
-      <form id="registrationForm" novalidate>
-        <fieldset>
-          <legend>
-            <span class="step-pill" data-i18n="step1Pill">Step 1</span>
-            <span data-i18n="step1Label">Primary Contact</span>
-          </legend>
-          <div class="fields-grid">
-            <label>
-              <span data-i18n="primaryFirstNameLabel">Primary First Name</span>
-              <input
-                type="text"
-                name="primaryFirstName"
-                id="primaryFirstName"
-                placeholder="First name"
-                required
-              />
-            </label>
-            <label>
-              <span data-i18n="lastNameLabel">Last Name</span>
-              <input
-                type="text"
-                name="primaryLastName"
-                id="primaryLastName"
-                placeholder="Last name"
-                required
-              />
-            </label>
-            <label>
-              <span data-i18n="mobilePhoneLabel">Mobile Phone</span>
-              <input
-                type="tel"
-                name="phone"
-                id="phone"
-                placeholder="Phone number"
-                pattern="[0-9()+\-\s]{10,}"
-                required
-              />
-            </label>
-            <label>
-              <span data-i18n="spouseFirstNameLabel">Spouse First Name</span>
-              <input
-                type="text"
-                name="spouseFirstName"
-                id="spouseFirstName"
-                placeholder="First name"
-              />
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>
-            <span class="step-pill" data-i18n="step2Pill">Step 2</span>
-            <span data-i18n="step2Label">Attendance Details</span>
-          </legend>
-          <p class="legend-subtext" data-i18n="step2Subtext">
-            Adults are 13+, children are under 13. Adjust totals for everyone
-            coming with you.
-          </p>
-          <div class="attendance-grid">
-            <label>
-              <span data-i18n="adultsFieldLabel">Adults (13+)</span>
-              <input
-                type="number"
-                id="adultCount"
-                name="adultCount"
-                min="1"
-                value="1"
-                required
-              />
-            </label>
-            <label>
-              <span data-i18n="childrenFieldLabel">Children (0-12)</span>
-              <input
-                type="number"
-                id="childCount"
-                name="childCount"
-                min="0"
-                value="0"
-              />
-            </label>
-          </div>
-          <p class="helper-text" data-i18n="priceNote">Adults $30 / Kids $15.</p>
-        </fieldset>
-
-        <fieldset>
-          <legend>
-            <span class="step-pill" data-i18n="step3Pill">Step 3</span>
-            <span data-i18n="step3Label">First Names</span>
-          </legend>
-          <p class="legend-subtext" data-i18n="step3Subtext">
-            Please enter the first name of each attendee.
-          </p>
-
-          <div id="adultTable" class="attendee-table">
-            <h3 data-i18n="adultTableHeading">Adult First Names</h3>
-            <div class="grid-two" id="adultList"></div>
-          </div>
-
-          <div id="childTable" class="attendee-table" style="display: none">
-            <h3 data-i18n="childTableHeading">Child First Names</h3>
-            <p data-i18n="childTableNote">
-              We'll have something special for each child. List them here.
-            </p>
-            <div class="grid-two" id="childList"></div>
-          </div>
-        </fieldset>
-
-        <div class="submit-panel">
-          <button type="submit" data-i18n="submitButton">Submit Registration</button>
-          <p id="status" class="status-message"></p>
-        </div>
-      </form>
-
-      <section id="successPanel">
-        <div id="cardPayment" class="card-payment">
-          <div class="card-payment__header">
-            <div>
-              <p class="card-payment__eyebrow" data-i18n="cardPaymentEyebrow">
-                Secure card payment
-              </p>
-              <h3 class="card-payment__title" data-i18n="cardPaymentTitle">
-                Pay by card with Stripe
-              </h3>
-              <p class="card-payment__copy" data-i18n="cardPaymentCopy">
-                Use the tabs to pay with card or wallet. Powered by Stripe.
-              </p>
-            </div>
-            <div class="card-payment__pill">
-              <span data-i18n="cardPaymentDueLabel">Amount due</span>
-              <strong id="cardTotal">$0.00</strong>
-            </div>
-          </div>
-          <form id="paymentForm" class="payment-form">
-            <div id="payment-element" class="payment-element"></div>
-            <button type="button" id="payNowButton" data-i18n="payButtonLabel">
-              Pay now
-            </button>
-            <p id="paymentStatus" class="status-message"></p>
-          </form>
-        </div>
-      </section>
-    </div>
+  </div>
 
   <script src="https://js.stripe.com/v3" defer></script>
-  <script
-    src="main.js"
-    defer
-    data-script-url="https://script.google.com/macros/s/AKfycbyOg74u_9FGi_Cc7XZ0ttL_xzUM4_czFse6dd5TdoDRZCpZJwMt8pWk38T168K2QVk/exec"
-    data-stripe-publishable-key=""
-  ></script>
-  </body>
+  <script src="main.js" defer
+    data-script-url="https://script.google.com/macros/s/AKfycbwjSj9GXL8RV_eLkXUoTMKM857Ibs5n2zYNw26xqOGQsI2hT11HPgqrHb1RqIPMEY8/exec"
+    data-stripe-publishable-key="pk_test_51SZjFUE8s9mKtKjMSxKwpuLkeEF3C4Z72grywee4gdGEt9AsQinmWmtmYo6mSyKQvdhaaMJLoh1cuYWuNHekWn0u00vbYl3ujd"></script>
+</body>
+
 </html>

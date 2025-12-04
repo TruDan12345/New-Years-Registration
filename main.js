@@ -270,7 +270,7 @@ requiredFields.forEach(({ input }) => {
 
 const mainScriptTag = document.querySelector('script[src$="main.js"]');
 const scriptURL = mainScriptTag?.getAttribute("data-script-url") ||
-  "https://script.google.com/macros/s/AKfycbyOg74u_9FGi_Cc7XZ0ttL_xzUM4_czFse6dd5TdoDRZCpZJwMt8pWk38T168K2QVk/exec";
+  "https://script.google.com/macros/s/AKfycbwjSj9GXL8RV_eLkXUoTMKM857Ibs5n2zYNw26xqOGQsI2hT11HPgqrHb1RqIPMEY8/exec";
 const stripePublishableKey =
   (mainScriptTag?.getAttribute("data-stripe-publishable-key") || "").trim();
 
@@ -374,11 +374,7 @@ const initializeStripePayment = async (clientSecret, totalCostValue, paymentErro
   stripePaymentElement.mount("#payment-element");
   activeClientSecret = clientSecret;
   payButton.disabled = false;
-  showPaymentStatus(
-    getString("paymentReadyNote") ||
-      "Card form ready. Payments are securely processed by Stripe.",
-    "success"
-  );
+
 };
 
 const confirmStripePayment = async () => {
