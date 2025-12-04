@@ -455,6 +455,10 @@ const confirmStripePayment = async () => {
     const finalSuccess = document.getElementById("finalSuccess");
     if (finalSuccess) finalSuccess.style.display = "block";
 
+    // Show the footer with logo
+    const successFooter = document.getElementById("successFooter");
+    if (successFooter) successFooter.style.display = "block";
+
     // Scroll to it
     if (finalSuccess) finalSuccess.scrollIntoView({ behavior: "smooth" });
 
