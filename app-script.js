@@ -318,3 +318,46 @@ function testStripePermission() {
   const result = createPaymentIntent(1, { test: 'true' });
   Logger.log(result);
 }
+
+/**
+ * SIMULATION: Run this function to test if the script can write to the sheet.
+ * It fakes a Stripe Webhook event.
+ */
+function testWebhookSimulation() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const debugSheet = getOrCreateDebugSheet(ss);
+  
+  Logger.log('Starting Webhook Simulation...');
+  
+  // Fake event object that looks like what Stripe sends
+  const fakeEvent = {
+    postData: {
+      contents: JSON.stringify({
+        type: 'payment_intent.succeeded',
+        data: {
+          object: {
+            id: 'pi_TEST_SIMULATION_' + new Date().getTime(),
+            metadata: {
+              primaryFirstName: 'Test',
+              primaryLastName: 'Family',
+              spouseFirstName: 'Simulation',
+              phone: '555-0199',
+              adults: '2',
+              children: '1',
+              adultNames: 'Test, Simulation',
+              childNames: 'Junior',
+              totalCost: '45'
+            }
+          }
+        }
+      })
+    }
+  };
+
+  // Call the handler directly
+  const result = handleWebhook(fakeEvent, ss, debugSheet);
+  
+  Logger.log('Simulation Result: ' + JSON.stringify(result));
+  Logger.log('Check your "New Year Family Registration" sheet for a new row.');
+  Logger.log('Check your "Debug" sheet for logs.');
+}

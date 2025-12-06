@@ -270,7 +270,7 @@ requiredFields.forEach(({ input }) => {
 
 const mainScriptTag = document.querySelector('script[src$="main.js"]');
 const scriptURL = mainScriptTag?.getAttribute("data-script-url") ||
-  "https://script.google.com/macros/s/AKfycbwjSj9GXL8RV_eLkXUoTMKM857Ibs5n2zYNw26xqOGQsI2hT11HPgqrHb1RqIPMEY8/exec";
+  "https://script.google.com/macros/s/AKfycbxgo4tuGHjfg3QRxrjwa9pZILyc8dNI3pmjvrsCRgp5qxQx-Qdc6PLasXfXSPIbVhlI/exec";
 const stripePublishableKey =
   (mainScriptTag?.getAttribute("data-stripe-publishable-key") || "").trim();
 
@@ -323,79 +323,92 @@ const getPublishableKey = () => {
 };
 
 const initializeStripePayment = async (clientSecret, totalCostValue, paymentErrorMessage) => {
-  if (!cardPaymentPanel || !paymentElementContainer || !payButton) return;
-  resetPaymentUI();
-  cardPaymentPanel.style.display = "block";
+  try {
+    if (!cardPaymentPanel || !paymentElementContainer || !payButton) return;
+    resetPaymentUI();
+    cardPaymentPanel.style.display = "block";
 
-  if (paymentErrorMessage) {
-    showPaymentStatus(paymentErrorMessage, "error");
-    return;
-  }
-
-  if (!clientSecret) {
-    showPaymentStatus(
-      getString("paymentUnavailable") || "Card payments are unavailable right now.",
-      "error"
-    );
-    return;
-  }
-
-  if (cardTotalEl) {
-    cardTotalEl.textContent = formatCurrency(totalCostValue);
-  }
-
-  const publishableKey = getPublishableKey();
-  if (!publishableKey) {
-    showPaymentStatus(
-      getString("paymentMissingKey") || "Stripe is not configured. Please contact us.",
-      "error"
-    );
-    return;
-  }
-
-  if (typeof Stripe === "undefined") {
-    showPaymentStatus(
-      getString("paymentUnavailable") || "Card payments are unavailable right now.",
-      "error"
-    );
-    return;
-  }
-
-  if (!stripeInstance || activePublishableKey !== publishableKey) {
-    stripeInstance = Stripe(publishableKey);
-    activePublishableKey = publishableKey;
-  }
-
-  const loader = document.getElementById("payment-loader");
-  if (loader) loader.style.display = "block";
-  if (paymentElementContainer) paymentElementContainer.style.display = "none";
-
-  stripeElements = stripeInstance.elements({
-    clientSecret,
-    appearance: { theme: "stripe" },
-  });
-
-  const expressCheckoutElement = stripeElements.create("expressCheckout");
-  expressCheckoutElement.mount("#express-checkout-element");
-
-  stripePaymentElement = stripeElements.create("payment", {
-    layout: "tabs",
-    wallets: {
-      applePay: "never",
-      googlePay: "never",
+    if (paymentErrorMessage) {
+      showPaymentStatus(paymentErrorMessage, "error");
+      return;
     }
-  });
-  stripePaymentElement.mount("#payment-element");
 
-  stripePaymentElement.on("ready", () => {
-    if (loader) loader.style.display = "none";
-    if (paymentElementContainer) paymentElementContainer.style.display = "block";
-  });
+    if (!clientSecret) {
+      showPaymentStatus(
+        getString("paymentUnavailable") || "Card payments are unavailable right now.",
+        "error"
+      );
+      return;
+    }
 
-  activeClientSecret = clientSecret;
-  payButton.disabled = false;
+    if (cardTotalEl) {
+      cardTotalEl.textContent = formatCurrency(totalCostValue);
+    }
 
+    const publishableKey = getPublishableKey();
+    if (!publishableKey) {
+      showPaymentStatus(
+        getString("paymentMissingKey") || "Stripe is not configured. Please contact us.",
+        "error"
+      );
+      return;
+    }
+
+    if (typeof Stripe === "undefined") {
+      showPaymentStatus(
+        getString("paymentUnavailable") || "Card payments are unavailable right now.",
+        "error"
+      );
+      return;
+    }
+
+    if (!stripeInstance || activePublishableKey !== publishableKey) {
+      stripeInstance = Stripe(publishableKey);
+      activePublishableKey = publishableKey;
+    }
+
+    const loader = document.getElementById("payment-loader");
+    if (loader) loader.style.display = "block";
+    if (paymentElementContainer) paymentElementContainer.style.display = "none";
+
+    stripeElements = stripeInstance.elements({
+      clientSecret,
+      appearance: { theme: "stripe" },
+    });
+
+    const expressCheckoutElement = stripeElements.create("expressCheckout");
+    expressCheckoutElement.mount("#express-checkout-element");
+
+    stripePaymentElement = stripeElements.create("payment", {
+      layout: "tabs",
+      wallets: {
+        applePay: "never",
+        googlePay: "never",
+      }
+    });
+    stripePaymentElement.mount("#payment-element");
+
+    stripePaymentElement.on("ready", () => {
+      if (loader) loader.style.display = "none";
+      if (paymentElementContainer) paymentElementContainer.style.display = "block";
+    });
+
+    activeClientSecret = clientSecret;
+    payButton.disabled = false;
+
+  } catch (err) {
+    console.error("Stripe Initialization Error:", err);
+    showPaymentStatus("Failed to load payment form. Please refresh and try again.", "error");
+  }
 };
+
+// Global error handler for unhandled promises (like Stripe network errors)
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("Unhandled rejection:", event.reason);
+  if (event.reason && event.reason.message && event.reason.message.includes("stripe")) {
+    showPaymentStatus("Connection to payment provider failed. Please disable ad blockers and try again.", "error");
+  }
+});
 
 const confirmStripePayment = async () => {
   if (!stripeInstance || !stripeElements || !stripePaymentElement || !activeClientSecret) {
