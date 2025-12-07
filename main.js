@@ -411,6 +411,7 @@ window.addEventListener("unhandledrejection", (event) => {
       event.reason.message.includes("r.stripe.com") ||
       event.reason.message.includes("m.stripe.com")
     ) {
+      event.preventDefault();
       return;
     }
     showPaymentStatus("Connection to payment provider failed. Please disable ad blockers and try again.", "error");
