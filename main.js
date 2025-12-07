@@ -713,7 +713,7 @@ form.addEventListener("submit", async (event) => {
     );
   } catch (err) {
     console.error(err);
-    statusEl.textContent = "Something went wrong. Please try again or contact us.";
+    statusEl.textContent = `Error: ${err.message || "Unknown error"}. Please try again.`;
     statusEl.className = "status-message error";
     statusEl.style.display = "block";
     if (successPanel) {
