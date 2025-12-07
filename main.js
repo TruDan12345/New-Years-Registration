@@ -444,295 +444,299 @@ const confirmStripePayment = async () => {
   }
 
   if (payButton) {
+    payButton.disabled = true;
+    payButton.textContent = getString("payButtonProcessing") || "Processing...";
+  }
+  showPaymentStatus(getString("payButtonProcessing") || "Processing...");
 
-    let confirmationResult;
-    try {
-      confirmationResult = await stripeInstance.confirmPayment({
-        elements: stripeElements,
-        confirmParams: {
-          return_url: window.location.href,
-        },
-        redirect: "if_required",
-      });
-    } catch (err) {
-      showPaymentStatus(
-        err.message || "Payment could not be completed.",
-        "error"
-      );
-      if (payButton) {
-        payButton.disabled = false;
-        payButton.textContent = getString("payButtonLabel") || "Pay now";
-      }
-      return;
-    }
-
-    const { error, paymentIntent } = confirmationResult;
-
-    if (error) {
-      showPaymentStatus(error.message || "Payment could not be completed.", "error");
-      if (payButton) {
-        payButton.disabled = false;
-        payButton.textContent = getString("payButtonLabel") || "Pay now";
-      }
-      return;
-    }
-
-    if (
-      paymentIntent &&
-      (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")
-    ) {
-      // Hide the payment form
-      if (successPanel) successPanel.style.display = "none";
-
-      // Show the final success screen
-      const finalSuccess = document.getElementById("finalSuccess");
-      if (finalSuccess) finalSuccess.style.display = "block";
-
-      // Show the footer with logo
-      const successFooter = document.getElementById("successFooter");
-      if (successFooter) successFooter.style.display = "block";
-
-      // Scroll to it
-      if (finalSuccess) finalSuccess.scrollIntoView({ behavior: "smooth" });
-
-    } else {
-      showPaymentStatus(
-        getString("paymentUnavailable") || "Card payments are unavailable right now.",
-        "error"
-      );
-      if (payButton) {
-        payButton.disabled = false;
-        payButton.textContent = getString("payButtonLabel") || "Pay now";
-      }
-    }
-  };
-
-  const getFirstName = (value) => value.trim().split(/\s+/)[0] || "";
-
-  const buildNameInputs = () => {
-    const adultCount = Number(adultInput.value) || 0;
-    const childCount = Number(childInput.value) || 0;
-
-    const existingAdultValues = Array.from(adultList.querySelectorAll("input")).map(
-      (input) => input.value.trim()
-    );
-    const existingChildValues = Array.from(childList.querySelectorAll("input")).map(
-      (input) => input.value.trim()
-    );
-
-    adultList.innerHTML = "";
-    childList.innerHTML = "";
-
-    const defaultAdults = [
-      getFirstName(primaryFirstNameEl.value),
-      getFirstName(spouseFirstNameEl.value),
-    ];
-
-    for (let i = 0; i < adultCount; i += 1) {
-      const wrapper = document.createElement("label");
-      wrapper.textContent = `Adult ${i + 1}`;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.required = true;
-      input.placeholder = "First name";
-
-      const defaultValue = defaultAdults[i];
-      const previousValue = existingAdultValues[i] || "";
-
-      if (defaultValue) {
-        input.value = defaultValue;
-        input.disabled = true;
-        input.classList.add("prefilled");
-      } else {
-        input.value = previousValue;
-      }
-
-      wrapper.appendChild(input);
-      adultList.appendChild(wrapper);
-    }
-
-    childTable.style.display = childCount ? "block" : "none";
-    for (let i = 0; i < childCount; i += 1) {
-      const wrapper = document.createElement("label");
-      wrapper.textContent = `Child ${i + 1}`;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.required = true;
-      input.placeholder = "First name";
-      input.value = existingChildValues[i] || "";
-      wrapper.appendChild(input);
-      childList.appendChild(wrapper);
-    }
-  };
-
-  const enforceAdultMinimum = () => {
-    const spouseFilled = Boolean(spouseFirstNameEl.value.trim());
-    const minimumAdults = spouseFilled ? 2 : 1;
-    adultInput.min = minimumAdults;
-    let currentAdults = Number(adultInput.value) || minimumAdults;
-    if (spouseFilled && currentAdults < minimumAdults) {
-      currentAdults = minimumAdults;
-    }
-    if (!spouseFilled && currentAdults === 2) {
-      currentAdults = minimumAdults;
-    }
-    adultInput.value = currentAdults;
-    buildNameInputs();
-  };
-
-  const getUpcomingNewYear = () => {
-    const now = new Date();
-    const nextYear =
-      now.getMonth() === 0 && now.getDate() === 1 ? now.getFullYear() : now.getFullYear() + 1;
-    return new Date(nextYear, 0, 1);
-  };
-
-  const updateCountdownDisplay = () => {
-    if (!countdownNumberEl) return;
-    const targetDate = getUpcomingNewYear();
-    const now = new Date();
-    const differenceMs = targetDate.getTime() - now.getTime();
-    const totalSeconds = Math.max(0, Math.floor(differenceMs / 1000));
-    const secondsPerDay = 60 * 60 * 24;
-    const secondsPerHour = 60 * 60;
-    const secondsPerMinute = 60;
-
-    const daysRemaining = Math.floor(totalSeconds / secondsPerDay);
-    const remainderAfterDays = totalSeconds % secondsPerDay;
-    const hoursRemaining = Math.floor(remainderAfterDays / secondsPerHour);
-    const remainderAfterHours = remainderAfterDays % secondsPerHour;
-    const minutesRemaining = Math.floor(remainderAfterHours / secondsPerMinute);
-    const secondsRemaining = remainderAfterHours % secondsPerMinute;
-
-    const nextDayText = String(daysRemaining);
-    const dayLabel = getString("daysLabel") || "days";
-    countdownNumberEl.textContent = `${nextDayText} ${dayLabel}`;
-
-    if (countdownTimeEl) {
-      const formatSegment = (value) => String(value).padStart(2, "0");
-      const timeString = `${formatSegment(hoursRemaining)}:${formatSegment(
-        minutesRemaining
-      )}:${formatSegment(secondsRemaining)}`;
-      countdownTimeEl.textContent = timeString;
-    }
-  };
-
-  primaryFirstNameEl.addEventListener("input", buildNameInputs);
-  spouseFirstNameEl.addEventListener("input", enforceAdultMinimum);
-  adultInput.addEventListener("input", () => {
-    if (adultInput.value === "") return;
-    buildNameInputs();
-  });
-  childInput.addEventListener("input", () => {
-    if (childInput.value === "") return;
-    buildNameInputs();
-  });
-  if (payButton) {
-    payButton.addEventListener("click", (event) => {
-      event.preventDefault();
-      confirmStripePayment();
+  let confirmationResult;
+  try {
+    confirmationResult = await stripeInstance.confirmPayment({
+      elements: stripeElements,
+      confirmParams: {
+        return_url: window.location.href,
+      },
+      redirect: "if_required",
     });
+  } catch (err) {
+    showPaymentStatus(
+      err.message || "Payment could not be completed.",
+      "error"
+    );
+    if (payButton) {
+      payButton.disabled = false;
+      payButton.textContent = getString("payButtonLabel") || "Pay now";
+    }
+    return;
   }
 
-  form.addEventListener("submit", async (event) => {
+  const { error, paymentIntent } = confirmationResult;
+
+  if (error) {
+    showPaymentStatus(error.message || "Payment could not be completed.", "error");
+    if (payButton) {
+      payButton.disabled = false;
+      payButton.textContent = getString("payButtonLabel") || "Pay now";
+    }
+    return;
+  }
+
+  if (
+    paymentIntent &&
+    (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")
+  ) {
+    // Hide the payment form
+    if (successPanel) successPanel.style.display = "none";
+
+    // Show the final success screen
+    const finalSuccess = document.getElementById("finalSuccess");
+    if (finalSuccess) finalSuccess.style.display = "block";
+
+    // Show the footer with logo
+    const successFooter = document.getElementById("successFooter");
+    if (successFooter) successFooter.style.display = "block";
+
+    // Scroll to it
+    if (finalSuccess) finalSuccess.scrollIntoView({ behavior: "smooth" });
+
+  } else {
+    showPaymentStatus(
+      getString("paymentUnavailable") || "Card payments are unavailable right now.",
+      "error"
+    );
+    if (payButton) {
+      payButton.disabled = false;
+      payButton.textContent = getString("payButtonLabel") || "Pay now";
+    }
+  }
+};
+
+const getFirstName = (value) => value.trim().split(/\s+/)[0] || "";
+
+const buildNameInputs = () => {
+  const adultCount = Number(adultInput.value) || 0;
+  const childCount = Number(childInput.value) || 0;
+
+  const existingAdultValues = Array.from(adultList.querySelectorAll("input")).map(
+    (input) => input.value.trim()
+  );
+  const existingChildValues = Array.from(childList.querySelectorAll("input")).map(
+    (input) => input.value.trim()
+  );
+
+  adultList.innerHTML = "";
+  childList.innerHTML = "";
+
+  const defaultAdults = [
+    getFirstName(primaryFirstNameEl.value),
+    getFirstName(spouseFirstNameEl.value),
+  ];
+
+  for (let i = 0; i < adultCount; i += 1) {
+    const wrapper = document.createElement("label");
+    wrapper.textContent = `Adult ${i + 1}`;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.required = true;
+    input.placeholder = "First name";
+
+    const defaultValue = defaultAdults[i];
+    const previousValue = existingAdultValues[i] || "";
+
+    if (defaultValue) {
+      input.value = defaultValue;
+      input.disabled = true;
+      input.classList.add("prefilled");
+    } else {
+      input.value = previousValue;
+    }
+
+    wrapper.appendChild(input);
+    adultList.appendChild(wrapper);
+  }
+
+  childTable.style.display = childCount ? "block" : "none";
+  for (let i = 0; i < childCount; i += 1) {
+    const wrapper = document.createElement("label");
+    wrapper.textContent = `Child ${i + 1}`;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.required = true;
+    input.placeholder = "First name";
+    input.value = existingChildValues[i] || "";
+    wrapper.appendChild(input);
+    childList.appendChild(wrapper);
+  }
+};
+
+const enforceAdultMinimum = () => {
+  const spouseFilled = Boolean(spouseFirstNameEl.value.trim());
+  const minimumAdults = spouseFilled ? 2 : 1;
+  adultInput.min = minimumAdults;
+  let currentAdults = Number(adultInput.value) || minimumAdults;
+  if (spouseFilled && currentAdults < minimumAdults) {
+    currentAdults = minimumAdults;
+  }
+  if (!spouseFilled && currentAdults === 2) {
+    currentAdults = minimumAdults;
+  }
+  adultInput.value = currentAdults;
+  buildNameInputs();
+};
+
+const getUpcomingNewYear = () => {
+  const now = new Date();
+  const nextYear =
+    now.getMonth() === 0 && now.getDate() === 1 ? now.getFullYear() : now.getFullYear() + 1;
+  return new Date(nextYear, 0, 1);
+};
+
+const updateCountdownDisplay = () => {
+  if (!countdownNumberEl) return;
+  const targetDate = getUpcomingNewYear();
+  const now = new Date();
+  const differenceMs = targetDate.getTime() - now.getTime();
+  const totalSeconds = Math.max(0, Math.floor(differenceMs / 1000));
+  const secondsPerDay = 60 * 60 * 24;
+  const secondsPerHour = 60 * 60;
+  const secondsPerMinute = 60;
+
+  const daysRemaining = Math.floor(totalSeconds / secondsPerDay);
+  const remainderAfterDays = totalSeconds % secondsPerDay;
+  const hoursRemaining = Math.floor(remainderAfterDays / secondsPerHour);
+  const remainderAfterHours = remainderAfterDays % secondsPerHour;
+  const minutesRemaining = Math.floor(remainderAfterHours / secondsPerMinute);
+  const secondsRemaining = remainderAfterHours % secondsPerMinute;
+
+  const nextDayText = String(daysRemaining);
+  const dayLabel = getString("daysLabel") || "days";
+  countdownNumberEl.textContent = `${nextDayText} ${dayLabel}`;
+
+  if (countdownTimeEl) {
+    const formatSegment = (value) => String(value).padStart(2, "0");
+    const timeString = `${formatSegment(hoursRemaining)}:${formatSegment(
+      minutesRemaining
+    )}:${formatSegment(secondsRemaining)}`;
+    countdownTimeEl.textContent = timeString;
+  }
+};
+
+primaryFirstNameEl.addEventListener("input", buildNameInputs);
+spouseFirstNameEl.addEventListener("input", enforceAdultMinimum);
+adultInput.addEventListener("input", () => {
+  if (adultInput.value === "") return;
+  buildNameInputs();
+});
+childInput.addEventListener("input", () => {
+  if (childInput.value === "") return;
+  buildNameInputs();
+});
+if (payButton) {
+  payButton.addEventListener("click", (event) => {
     event.preventDefault();
-    statusEl.style.display = "none";
+    confirmStripePayment();
+  });
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  statusEl.style.display = "none";
+  statusEl.textContent = "";
+  statusEl.className = "status-message";
+  resetPaymentUI();
+
+  if (!validateRequiredFields()) {
+    return;
+  }
+
+  const totalCostValue =
+    Number(adultInput.value || 0) * COSTS.adult + Number(childInput.value || 0) * COSTS.child;
+
+  const payload = {
+    primaryFirstName: primaryFirstNameEl.value.trim(),
+    primaryLastName: primaryLastNameEl.value.trim(),
+    spouseFirstName: spouseFirstNameEl.value.trim() || null,
+    phone: phoneInput.value.trim(),
+    adults: Number(adultInput.value) || 0,
+    children: Number(childInput.value) || 0,
+    adultNames: Array.from(adultList.querySelectorAll("input")).map((input) =>
+      input.value.trim()
+    ),
+    childNames: Array.from(childList.querySelectorAll("input")).map((input) =>
+      input.value.trim()
+    ),
+    totalCost: String(totalCostValue),
+    timestamp: new Date().toISOString(),
+  };
+
+  // Show spinner
+  const submitLoader = document.getElementById("submit-loader");
+  if (submitLoader) submitLoader.style.display = "block";
+
+  statusEl.textContent = "Submitting...";
+  statusEl.classList.add("helper-text");
+  statusEl.style.display = "block";
+
+  try {
+    const response = await fetch(scriptURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    let responseData = {};
+    try {
+      responseData = await response.json();
+    } catch (parseError) {
+      throw new Error("Unable to read server response.");
+    }
+
+    if (responseData.status !== "ok") {
+      throw new Error(responseData.message || "Submission failed.");
+    }
+
+    form.reset();
+    adultInput.value = spouseFirstNameEl.value.trim() ? 2 : 1;
+    childInput.value = 0;
+    buildNameInputs();
+
     statusEl.textContent = "";
     statusEl.className = "status-message";
-    resetPaymentUI();
+    statusEl.style.display = "none";
 
-    if (!validateRequiredFields()) {
-      return;
+    updateTotalDisplays(totalCostValue);
+    if (successPanel) {
+      successPanel.style.display = "block";
     }
 
-    const totalCostValue =
-      Number(adultInput.value || 0) * COSTS.adult + Number(childInput.value || 0) * COSTS.child;
-
-    const payload = {
-      primaryFirstName: primaryFirstNameEl.value.trim(),
-      primaryLastName: primaryLastNameEl.value.trim(),
-      spouseFirstName: spouseFirstNameEl.value.trim() || null,
-      phone: phoneInput.value.trim(),
-      adults: Number(adultInput.value) || 0,
-      children: Number(childInput.value) || 0,
-      adultNames: Array.from(adultList.querySelectorAll("input")).map((input) =>
-        input.value.trim()
-      ),
-      childNames: Array.from(childList.querySelectorAll("input")).map((input) =>
-        input.value.trim()
-      ),
-      totalCost: String(totalCostValue),
-      timestamp: new Date().toISOString(),
-    };
-
-    // Show spinner
-    const submitLoader = document.getElementById("submit-loader");
-    if (submitLoader) submitLoader.style.display = "block";
-
-    statusEl.textContent = "Submitting...";
-    statusEl.classList.add("helper-text");
+    form.style.display = "none";
+    await initializeStripePayment(
+      responseData.clientSecret,
+      totalCostValue,
+      responseData.paymentError
+    );
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = `Error: ${err.message || "Unknown error"}. Please try again.`;
+    statusEl.className = "status-message error";
     statusEl.style.display = "block";
-
-    try {
-      const response = await fetch(scriptURL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      let responseData = {};
-      try {
-        responseData = await response.json();
-      } catch (parseError) {
-        throw new Error("Unable to read server response.");
-      }
-
-      if (responseData.status !== "ok") {
-        throw new Error(responseData.message || "Submission failed.");
-      }
-
-      form.reset();
-      adultInput.value = spouseFirstNameEl.value.trim() ? 2 : 1;
-      childInput.value = 0;
-      buildNameInputs();
-
-      statusEl.textContent = "";
-      statusEl.className = "status-message";
-      statusEl.style.display = "none";
-
-      updateTotalDisplays(totalCostValue);
-      if (successPanel) {
-        successPanel.style.display = "block";
-      }
-
-      form.style.display = "none";
-      await initializeStripePayment(
-        responseData.clientSecret,
-        totalCostValue,
-        responseData.paymentError
-      );
-    } catch (err) {
-      console.error(err);
-      statusEl.textContent = `Error: ${err.message || "Unknown error"}. Please try again.`;
-      statusEl.className = "status-message error";
-      statusEl.style.display = "block";
-      if (successPanel) {
-        successPanel.style.display = "none";
-      }
-      resetPaymentUI();
-    } finally {
-      // Hide spinner
-      if (submitLoader) submitLoader.style.display = "none";
+    if (successPanel) {
+      successPanel.style.display = "none";
     }
-  });
+    resetPaymentUI();
+  } finally {
+    // Hide spinner
+    if (submitLoader) submitLoader.style.display = "none";
+  }
+});
 
-  applyTranslations();
-  buildNameInputs();
-  updateCountdownDisplay();
-  setInterval(updateCountdownDisplay, 1000);
+applyTranslations();
+buildNameInputs();
+updateCountdownDisplay();
+setInterval(updateCountdownDisplay, 1000);
