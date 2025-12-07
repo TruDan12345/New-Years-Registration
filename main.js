@@ -404,16 +404,22 @@ const initializeStripePayment = async (clientSecret, totalCostValue, paymentErro
 
 // Global error handler for unhandled promises (like Stripe network errors)
 window.addEventListener("unhandledrejection", (event) => {
-  console.error("Unhandled rejection:", event.reason);
-  if (event.reason && event.reason.message && event.reason.message.includes("stripe")) {
-    // Ignore telemetry/fraud detection blocks (common with ad blockers)
+  // 1. Check for ignored errors FIRST (telemetry/fraud detection blocks)
+  if (event.reason && event.reason.message) {
     if (
       event.reason.message.includes("r.stripe.com") ||
       event.reason.message.includes("m.stripe.com")
     ) {
-      event.preventDefault();
+      event.preventDefault(); // Prevent "Unhandled Promise Rejection" in console
       return;
     }
+  }
+
+  // 2. Log other errors for debugging
+  console.error("Unhandled rejection:", event.reason);
+
+  // 3. Show UI error for other Stripe errors
+  if (event.reason && event.reason.message && event.reason.message.includes("stripe")) {
     showPaymentStatus("Connection to payment provider failed. Please disable ad blockers and try again.", "error");
   }
 });
