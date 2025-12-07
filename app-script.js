@@ -26,16 +26,22 @@ function doPost(e) {
       })
     ]);
 
-    // Check if this is a webhook event
-    if (e && e.postData && e.postData.type === 'application/json') {
-      const bodyText = e.postData.contents || '';
-      if (bodyText.includes('"type":"payment_intent.succeeded"')) {
-        return handleWebhook(e, ss, debugSheet);
-      }
+    // Parse request body immediately
+    const data = parseRequestData(e, debugSheet);
+
+    // Check if this is a Stripe Webhook event
+    // Webhooks have specific structure: { type: "...", data: { ... }, object: "event" }
+    if (data && data.object === 'event' && data.type === 'payment_intent.succeeded') {
+      return handleWebhook(e, ss, debugSheet);
+    }
+
+    // Also check deeper in case structure differs slightly or manual test
+    if (data && data.type === 'payment_intent.succeeded') {
+      return handleWebhook(e, ss, debugSheet);
     }
 
     // Otherwise, it's a form submission
-    const data = parseRequestData(e, debugSheet);
+    // (data is already parsed, so we use it directly)
 
     // Normalize fields
     const asString = (v) => (v || '').toString().trim();
@@ -90,8 +96,35 @@ function doPost(e) {
       new Date(),
       'PAYMENT INTENT CREATED',
       piResult.paymentIntentId,
-      'Data stored in metadata (will save to sheet after payment)'
+      'Data stored in metadata'
     ]);
+
+    // --- NEW: Write to Sheet IMMEDIATELY (Pending Payment) ---
+    try {
+      const sheet = ss.getSheetByName(SHEET_NAME) || ss.getSheets()[0];
+      const familyLabel = primaryLastName ? primaryLastName + ' family' : 'Family';
+
+      sheet.appendRow([
+        new Date(),
+        familyLabel,
+        primaryFirstName,
+        primaryLastName,
+        spouseFirstName,
+        phone,
+        adults,
+        children,
+        adultNames,
+        childNames,
+        totalCostNum,
+        'Pending Payment', // Status column
+        piResult.paymentIntentId // Payment Intent ID for webhook matching
+      ]);
+
+      debugSheet.appendRow([new Date(), 'IMMEDIATE WRITE SUCCESS', familyLabel]);
+    } catch (sheetErr) {
+      debugSheet.appendRow([new Date(), 'IMMEDIATE WRITE ERROR', String(sheetErr)]);
+    }
+    // ---------------------------------------------------------
 
     return jsonResponse({
       status: 'ok',
@@ -144,32 +177,36 @@ function handleWebhook(e, ss, debugSheet) {
       JSON.stringify(metadata)
     ]);
 
-    // Write to sheet
+    // Find and update existing row
     const sheet = ss.getSheetByName(SHEET_NAME) || ss.getSheets()[0];
+    const data = sheet.getDataRange().getValues();
 
-    const familyLabel = metadata.primaryLastName
-      ? metadata.primaryLastName + ' family'
-      : 'Family';
+    // Search for row with matching payment intent ID (column M, index 12)
+    let rowIndex = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][12] === paymentIntent.id) {
+        rowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+    }
 
-    sheet.appendRow([
-      new Date(),
-      familyLabel,
-      metadata.primaryFirstName || '',
-      metadata.primaryLastName || '',
-      metadata.spouseFirstName || '',
-      metadata.phone || '',
-      Number(metadata.adults) || 0,
-      Number(metadata.children) || 0,
-      metadata.adultNames || '',
-      metadata.childNames || '',
-      Number(metadata.totalCost) || 0
-    ]);
-
-    debugSheet.appendRow([
-      new Date(),
-      'ROW APPENDED AFTER PAYMENT',
-      familyLabel
-    ]);
+    if (rowIndex > 0) {
+      // Update status column (L, index 11) to "Paid"
+      sheet.getRange(rowIndex, 12).setValue('✅ Paid');
+      debugSheet.appendRow([
+        new Date(),
+        'STATUS UPDATED TO PAID',
+        paymentIntent.id,
+        'Row ' + rowIndex
+      ]);
+    } else {
+      // Fallback: if row not found, log error
+      debugSheet.appendRow([
+        new Date(),
+        'ERROR: ROW NOT FOUND FOR PAYMENT',
+        paymentIntent.id
+      ]);
+    }
 
     return jsonResponse({ received: true });
 
@@ -326,9 +363,9 @@ function testStripePermission() {
 function testWebhookSimulation() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const debugSheet = getOrCreateDebugSheet(ss);
-  
+
   Logger.log('Starting Webhook Simulation...');
-  
+
   // Fake event object that looks like what Stripe sends
   const fakeEvent = {
     postData: {
@@ -356,7 +393,7 @@ function testWebhookSimulation() {
 
   // Call the handler directly
   const result = handleWebhook(fakeEvent, ss, debugSheet);
-  
+
   Logger.log('Simulation Result: ' + JSON.stringify(result));
   Logger.log('Check your "New Year Family Registration" sheet for a new row.');
   Logger.log('Check your "Debug" sheet for logs.');
