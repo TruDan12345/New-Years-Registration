@@ -406,6 +406,13 @@ const initializeStripePayment = async (clientSecret, totalCostValue, paymentErro
 window.addEventListener("unhandledrejection", (event) => {
   console.error("Unhandled rejection:", event.reason);
   if (event.reason && event.reason.message && event.reason.message.includes("stripe")) {
+    // Ignore telemetry/fraud detection blocks (common with ad blockers)
+    if (
+      event.reason.message.includes("r.stripe.com") ||
+      event.reason.message.includes("m.stripe.com")
+    ) {
+      return;
+    }
     showPaymentStatus("Connection to payment provider failed. Please disable ad blockers and try again.", "error");
   }
 });
