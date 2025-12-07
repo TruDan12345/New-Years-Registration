@@ -405,100 +405,104 @@ const initializeStripePayment = async (clientSecret, totalCostValue, paymentErro
 // Global error handler for unhandled promises (like Stripe network errors)
 window.addEventListener("unhandledrejection", (event) => {
   // 1. Check for ignored errors FIRST (telemetry/fraud detection blocks)
-  if (event.reason && event.reason.message) {
+  if (event.reason) {
+    const msg = (event.reason.message || "").toLowerCase();
+    const stack = (event.reason.stack || "").toLowerCase();
+
+    // Ignore ad-blocker related errors for Stripe telemetry
     if (
-      event.reason.message.includes("r.stripe.com") ||
-      event.reason.message.includes("m.stripe.com")
+      msg.includes("r.stripe.com") ||
+      msg.includes("m.stripe.com") ||
+      msg.includes("b.stripe.com") ||
+      msg.includes("load failed") ||
+      msg.includes("fetch") ||
+      msg.includes("blocked")
     ) {
-      event.preventDefault(); // Prevent "Unhandled Promise Rejection" in console
-      return;
+      // Check if it's likely a background Stripe request
+      if (msg.includes("stripe") || stack.includes("stripe")) {
+        event.preventDefault();
+        console.warn("Suppressing ad-blocker error:", msg);
+        return;
+      }
     }
   }
 
   // 2. Log other errors for debugging
   console.error("Unhandled rejection:", event.reason);
 
-  // 3. Show UI error for other Stripe errors
-  if (event.reason && event.reason.message && event.reason.message.includes("stripe")) {
-    showPaymentStatus("Connection to payment provider failed. Please disable ad blockers and try again.", "error");
-  }
-});
-
-const confirmStripePayment = async () => {
-  if (!stripeInstance || !stripeElements || !stripePaymentElement || !activeClientSecret) {
-    showPaymentStatus(
-      getString("paymentUnavailable") || "Card payments are unavailable right now.",
-      "error"
+  // 3. REMOVED: Do not show global UI alert for background network errors. 
+  // Real payment errors are handled in initializeStripePayment and confirmStripePayment.
+  "error"
     );
-    return;
+return;
   }
 
+if (payButton) {
+  payButton.disabled = true;
+  payButton.textContent = getString("payButtonProcessing") || "Processing...";
+}
+showPaymentStatus(getString("payButtonProcessing") || "Processing...");
+
+let confirmationResult;
+try {
+  confirmationResult = await stripeInstance.confirmPayment({
+    elements: stripeElements,
+    confirmParams: {
+      return_url: window.location.href,
+    },
+    redirect: "if_required",
+  });
+} catch (err) {
+  showPaymentStatus(
+    err.message || "Payment could not be completed.",
+    "error"
+  );
   if (payButton) {
-    payButton.disabled = true;
-    payButton.textContent = getString("payButtonProcessing") || "Processing...";
+    payButton.disabled = false;
+    payButton.textContent = getString("payButtonLabel") || "Pay now";
   }
-  showPaymentStatus(getString("payButtonProcessing") || "Processing...");
+  return;
+}
 
-  let confirmationResult;
-  try {
-    confirmationResult = await stripeInstance.confirmPayment({
-      elements: stripeElements,
-      confirmParams: {
-        return_url: window.location.href,
-      },
-      redirect: "if_required",
-    });
-  } catch (err) {
-    showPaymentStatus(
-      err.message || "Payment could not be completed.",
-      "error"
-    );
-    if (payButton) {
-      payButton.disabled = false;
-      payButton.textContent = getString("payButtonLabel") || "Pay now";
-    }
-    return;
+const { error, paymentIntent } = confirmationResult;
+
+if (error) {
+  showPaymentStatus(error.message || "Payment could not be completed.", "error");
+  if (payButton) {
+    payButton.disabled = false;
+    payButton.textContent = getString("payButtonLabel") || "Pay now";
   }
+  return;
+}
 
-  const { error, paymentIntent } = confirmationResult;
+if (
+  paymentIntent &&
+  (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")
+) {
+  // Hide the payment form
+  if (successPanel) successPanel.style.display = "none";
 
-  if (error) {
-    showPaymentStatus(error.message || "Payment could not be completed.", "error");
-    if (payButton) {
-      payButton.disabled = false;
-      payButton.textContent = getString("payButtonLabel") || "Pay now";
-    }
-    return;
+  // Show the final success screen
+  const finalSuccess = document.getElementById("finalSuccess");
+  if (finalSuccess) finalSuccess.style.display = "block";
+
+  // Show the footer with logo
+  const successFooter = document.getElementById("successFooter");
+  if (successFooter) successFooter.style.display = "block";
+
+  // Scroll to it
+  if (finalSuccess) finalSuccess.scrollIntoView({ behavior: "smooth" });
+
+} else {
+  showPaymentStatus(
+    getString("paymentUnavailable") || "Card payments are unavailable right now.",
+    "error"
+  );
+  if (payButton) {
+    payButton.disabled = false;
+    payButton.textContent = getString("payButtonLabel") || "Pay now";
   }
-
-  if (
-    paymentIntent &&
-    (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")
-  ) {
-    // Hide the payment form
-    if (successPanel) successPanel.style.display = "none";
-
-    // Show the final success screen
-    const finalSuccess = document.getElementById("finalSuccess");
-    if (finalSuccess) finalSuccess.style.display = "block";
-
-    // Show the footer with logo
-    const successFooter = document.getElementById("successFooter");
-    if (successFooter) successFooter.style.display = "block";
-
-    // Scroll to it
-    if (finalSuccess) finalSuccess.scrollIntoView({ behavior: "smooth" });
-
-  } else {
-    showPaymentStatus(
-      getString("paymentUnavailable") || "Card payments are unavailable right now.",
-      "error"
-    );
-    if (payButton) {
-      payButton.disabled = false;
-      payButton.textContent = getString("payButtonLabel") || "Pay now";
-    }
-  }
+}
 };
 
 const getFirstName = (value) => value.trim().split(/\s+/)[0] || "";
