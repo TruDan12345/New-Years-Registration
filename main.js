@@ -270,7 +270,7 @@ requiredFields.forEach(({ input }) => {
 
 const mainScriptTag = document.querySelector('script[src$="main.js"]');
 const scriptURL = mainScriptTag?.getAttribute("data-script-url") ||
-  "https://script.google.com/macros/s/AKfycbwUHCsn3J4nsFwE2rrZYr7Q3VQrUq0k04CiBHXkMNUJlk38KoCZt_b5zakFX_RC_r9k/exec";
+  "https://script.google.com/macros/s/AKfycbxXGJhELaX_DAkc7r_ZvqBIS2N8pekeLdgf-3oMG23zxeSdhOg7ohR1eF60JEEU-GaA/exec";
 const stripePublishableKey =
   (mainScriptTag?.getAttribute("data-stripe-publishable-key") || "").trim();
 
