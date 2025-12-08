@@ -521,6 +521,14 @@ button:active {
   opacity: 0.75;
 }
 
+.fee-text {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+  margin-bottom: 0.1rem;
+}
+
 .card-payment__pill strong {
   display: block;
   margin-top: 0.15rem;

@@ -279,13 +279,23 @@ const formatCurrency = (value) =>
     Number(value) || 0
   );
 
-const updateTotalDisplays = (value) => {
-  const formatted = formatCurrency(value);
+const updateTotalDisplays = (total, fees = 0) => {
+  const formattedTotal = formatCurrency(total);
   if (successTotalEl) {
-    successTotalEl.textContent = formatted;
+    successTotalEl.textContent = formattedTotal;
   }
   if (cardTotalEl) {
-    cardTotalEl.textContent = formatted;
+    cardTotalEl.textContent = formattedTotal;
+  }
+
+  const feeDisplay = document.getElementById("feeDisplay");
+  if (feeDisplay) {
+    if (fees > 0) {
+      feeDisplay.textContent = `+ ${formatCurrency(fees)} fees`;
+      feeDisplay.style.display = "block";
+    } else {
+      feeDisplay.style.display = "none";
+    }
   }
 };
 
@@ -649,8 +659,12 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  const totalCostValue =
+  const subtotal =
     Number(adultInput.value || 0) * COSTS.adult + Number(childInput.value || 0) * COSTS.child;
+
+  // Calculate Stripe fees (2.9% + $0.30)
+  const fees = (subtotal * 0.029) + 0.30;
+  const totalCostValue = subtotal + fees;
 
   const payload = {
     primaryFirstName: primaryFirstNameEl.value.trim(),
@@ -710,7 +724,7 @@ form.addEventListener("submit", async (event) => {
     statusEl.className = "status-message";
     statusEl.style.display = "none";
 
-    updateTotalDisplays(totalCostValue);
+    updateTotalDisplays(totalCostValue, fees);
     if (successPanel) {
       successPanel.style.display = "block";
     }
