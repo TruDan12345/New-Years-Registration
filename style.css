@@ -863,6 +863,7 @@ button:active {
 .instruction-text.small {
   font-size: 0.9rem;
   opacity: 0.8;
+  text-decoration: underline;
 }
 
 @media (max-width: 640px) {
