@@ -80,7 +80,7 @@ function doPost(e) {
       children: String(children),
       adultNames,
       childNames,
-      childNames,
+
       totalCost: String(totalCostNum),
       sheetCost: String(sheetCostNum) // Add to metadata just in case
     };
@@ -119,8 +119,7 @@ function doPost(e) {
         children,
         adultNames,
         childNames,
-        adultNames,
-        childNames,
+
         sheetCostNum, // Use the fee-free amount for the sheet
         'Pending Payment', // Status column
         piResult.paymentIntentId // Payment Intent ID for webhook matching

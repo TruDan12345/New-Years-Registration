@@ -297,7 +297,7 @@ requiredFields.forEach(({ input }) => {
 
 const mainScriptTag = document.querySelector('script[src$="main.js"]');
 const scriptURL = mainScriptTag?.getAttribute("data-script-url") ||
-  "https://script.google.com/macros/s/AKfycbzxYWJLygPWUhgQFpA-JSL0I6-zQ2GM1XSl7oDWdsq-FApaxS-pDw4-ULhct3gpAo2G/exec";
+  "https://script.google.com/macros/s/AKfycbzXN9F5pEUOZlXMjfCr1_aEKBsY7uOobHZKVtwz4ET0jB3KfuJw1yny80FnDKozccOh/exec";
 const stripePublishableKey =
   (mainScriptTag?.getAttribute("data-stripe-publishable-key") || "").trim();
 
