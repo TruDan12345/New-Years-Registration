@@ -67,6 +67,8 @@ function doPost(e) {
     }
 
     const totalCostNum = Number(data.totalCost || 0) || 0;
+    // Use sheetCost if provided (subtotal without fees), otherwise fallback to totalCost
+    const sheetCostNum = data.sheetCost ? (Number(data.sheetCost || 0) || totalCostNum) : totalCostNum;
 
     // Store all registration data in PaymentIntent metadata
     const registrationData = {
@@ -78,7 +80,9 @@ function doPost(e) {
       children: String(children),
       adultNames,
       childNames,
-      totalCost: String(totalCostNum)
+      childNames,
+      totalCost: String(totalCostNum),
+      sheetCost: String(sheetCostNum) // Add to metadata just in case
     };
 
     // Create PaymentIntent with metadata
@@ -115,7 +119,9 @@ function doPost(e) {
         children,
         adultNames,
         childNames,
-        totalCostNum,
+        adultNames,
+        childNames,
+        sheetCostNum, // Use the fee-free amount for the sheet
         'Pending Payment', // Status column
         piResult.paymentIntentId // Payment Intent ID for webhook matching
       ]);

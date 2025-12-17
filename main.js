@@ -297,7 +297,7 @@ requiredFields.forEach(({ input }) => {
 
 const mainScriptTag = document.querySelector('script[src$="main.js"]');
 const scriptURL = mainScriptTag?.getAttribute("data-script-url") ||
-  "https://script.google.com/macros/s/AKfycbzmyMyGRpz9cZSZLU7VbpfCDsbTg5hePt-5ZTaWxnVvDAsrd5X4n02jAf7EnSeGqbt9/exec";
+  "https://script.google.com/macros/s/AKfycbzxYWJLygPWUhgQFpA-JSL0I6-zQ2GM1XSl7oDWdsq-FApaxS-pDw4-ULhct3gpAo2G/exec";
 const stripePublishableKey =
   (mainScriptTag?.getAttribute("data-stripe-publishable-key") || "").trim();
 
@@ -713,6 +713,7 @@ form.addEventListener("submit", async (event) => {
       input.value.trim()
     ),
     totalCost: String(totalCostValue),
+    sheetCost: String(subtotal),
     timestamp: new Date().toISOString(),
   };
 
