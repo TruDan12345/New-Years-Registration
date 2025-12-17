@@ -119,34 +119,65 @@
     </form>
 
     <section id="successPanel">
-      <div id="cardPayment" class="card-payment">
-        <div class="card-payment__header">
-          <div>
-            <p class="card-payment__eyebrow" data-i18n="cardPaymentEyebrow">
-              Secure card payment
-            </p>
-            <h3 class="card-payment__title" data-i18n="cardPaymentTitle">
-              Pay by card with Stripe
-            </h3>
-            <p class="card-payment__copy" data-i18n="cardPaymentCopy">
-              Use the tabs to pay with card or wallet. Powered by Stripe.
-            </p>
+      <div class="payment-tabs">
+        <button type="button" class="tab-button active" data-tab="card" data-i18n="tabCard">Pay with Card</button>
+        <button type="button" class="tab-button" data-tab="cashapp" data-i18n="tabCashApp">Cash App</button>
+      </div>
+
+      <div id="tab-card" class="tab-content active">
+        <div id="cardPayment" class="card-payment">
+          <div class="card-payment__header">
+            <div>
+              <p class="card-payment__eyebrow" data-i18n="cardPaymentEyebrow">
+                Secure card payment
+              </p>
+              <h3 class="card-payment__title" data-i18n="cardPaymentTitle">
+                Pay by card with Stripe
+              </h3>
+              <p class="card-payment__copy" data-i18n="cardPaymentCopy">
+                Use the tabs to pay with card or wallet. Powered by Stripe.
+              </p>
+            </div>
+            <div class="card-payment__pill">
+              <span data-i18n="cardPaymentDueLabel">Amount due</span>
+              <span id="feeDisplay" class="fee-text" style="display:none"></span>
+              <strong id="cardTotal">$0.00</strong>
+            </div>
           </div>
-          <div class="card-payment__pill">
-            <span data-i18n="cardPaymentDueLabel">Amount due</span>
-            <span id="feeDisplay" class="fee-text" style="display:none"></span>
-            <strong id="cardTotal">$0.00</strong>
-          </div>
+          <div id="express-checkout-element"></div>
+          <form id="paymentForm" class="payment-form">
+            <div id="payment-loader" class="spinner"></div>
+            <div id="payment-element" class="payment-element"></div>
+            <button type="button" id="payNowButton" data-i18n="payButtonLabel">
+              Pay now
+            </button>
+            <p id="paymentStatus" class="status-message"></p>
+          </form>
         </div>
-        <div id="express-checkout-element"></div>
-        <form id="paymentForm" class="payment-form">
-          <div id="payment-loader" class="spinner"></div>
-          <div id="payment-element" class="payment-element"></div>
-          <button type="button" id="payNowButton" data-i18n="payButtonLabel">
-            Pay now
-          </button>
-          <p id="paymentStatus" class="status-message"></p>
-        </form>
+      </div>
+
+      <div id="tab-cashapp" class="tab-content">
+        <div class="cash-app-payment">
+          <div class="cash-app-header">
+            <h3 data-i18n="cashAppTitle">Pay with Cash App</h3>
+            <div class="cash-app-total-pill">
+              <span data-i18n="cashAppTotalLabel">Total (No fees)</span>
+              <strong id="cashAppTotal">$0.00</strong>
+            </div>
+          </div>
+
+          <div class="qr-wrapper">
+            <img src="images/cash_app.png" alt="Cash App QR Code" class="qr-code" />
+            <p class="cash-tag">$solferndale</p>
+          </div>
+
+          <p class="instruction-text" data-i18n="cashAppInstruction">
+            Scan to pay specifically the amount above using Cash App to avoid fees.
+          </p>
+          <p class="instruction-text small" data-i18n="cashAppMemoNote">
+            Please include your full name in the memo line.
+          </p>
+        </div>
       </div>
     </section>
 

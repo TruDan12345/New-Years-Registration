@@ -45,6 +45,12 @@ const TRANSLATIONS = {
     paymentUnavailable: "Card payments are unavailable right now. Please use another option.",
     paymentSuccess: "Payment received! You're all set.",
     paymentMissingKey: "Stripe is not configured. Please contact the organizer.",
+    tabCard: "Pay with Card",
+    tabCashApp: "Cash App",
+    cashAppTitle: "Pay with Cash App",
+    cashAppTotalLabel: "Total (No fees)",
+    cashAppInstruction: "Scan to pay or use username $solferndale to avoid fees.",
+    cashAppMemoNote: "Please include your full name in the memo line.",
   },
   es: {
     countdownHeading: "El Año Nuevo comienza en",
@@ -91,6 +97,12 @@ const TRANSLATIONS = {
     paymentUnavailable: "Los pagos con tarjeta no están disponibles. Usa otra opción.",
     paymentSuccess: "¡Pago recibido! Todo listo.",
     paymentMissingKey: "Stripe no está configurado. Contacta al organizador.",
+    tabCard: "Pagar con tarjeta",
+    tabCashApp: "Cash App",
+    cashAppTitle: "Pagar con Cash App",
+    cashAppTotalLabel: "Total (sin comisiones)",
+    cashAppInstruction: "Escanea para pagar o usa el usuario $solferndale para evitar comisiones.",
+    cashAppMemoNote: "Por favor incluya su nombre completo en la nota.",
   },
   ru: {
     countdownHeading: "До Нового года осталось",
@@ -138,6 +150,12 @@ const TRANSLATIONS = {
     paymentUnavailable: "Оплата картой сейчас недоступна. Выберите другой способ.",
     paymentSuccess: "Платеж получен! Все готово.",
     paymentMissingKey: "Stripe не настроен. Свяжитесь с организатором.",
+    tabCard: "Оплата картой",
+    tabCashApp: "Cash App",
+    cashAppTitle: "Оплата через Cash App",
+    cashAppTotalLabel: "Итого (без комиссии)",
+    cashAppInstruction: "Сканируйте для оплаты или отправьте на $solferndale (без комиссии).",
+    cashAppMemoNote: "Пожалуйста, укажите ваше полное имя в пометке.",
   },
   uk: {
     countdownHeading: "До Нового року залишилося",
@@ -185,6 +203,12 @@ const TRANSLATIONS = {
     paymentUnavailable: "Оплата карткою зараз недоступна. Скористайтесь іншим способом.",
     paymentSuccess: "Платіж отримано! Все готово.",
     paymentMissingKey: "Stripe не налаштований. Зв'яжіться з організатором.",
+    tabCard: "Оплата карткою",
+    tabCashApp: "Cash App",
+    cashAppTitle: "Оплата через Cash App",
+    cashAppTotalLabel: "Всього (без комісії)",
+    cashAppInstruction: "Скануйте для оплати або надішліть на $solferndale (без комісії).",
+    cashAppMemoNote: "Будь ласка, вкажіть ваше повне ім'я в примітці.",
   },
 };
 
@@ -233,6 +257,9 @@ const paymentStatusEl = document.getElementById("paymentStatus");
 const paymentElementContainer = document.getElementById("payment-element");
 const cardTotalEl = document.getElementById("cardTotal");
 const cardPaymentPanel = document.getElementById("cardPayment");
+const cashAppTotalEl = document.getElementById("cashAppTotal");
+const tabButtons = document.querySelectorAll(".tab-button");
+const tabContents = document.querySelectorAll(".tab-content");
 
 let stripeInstance = null;
 let stripeElements = null;
@@ -286,6 +313,12 @@ const updateTotalDisplays = (total, fees = 0) => {
   }
   if (cardTotalEl) {
     cardTotalEl.textContent = formattedTotal;
+  }
+
+  // Calculate subtotal (without fees) for Cash App
+  const subtotal = Math.max(0, total - fees);
+  if (cashAppTotalEl) {
+    cashAppTotalEl.textContent = formatCurrency(subtotal);
   }
 
   const feeDisplay = document.getElementById("feeDisplay");
@@ -754,3 +787,22 @@ applyTranslations();
 buildNameInputs();
 updateCountdownDisplay();
 setInterval(updateCountdownDisplay, 1000);
+
+// Tab Switching Logic
+tabButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    // Remove active class from all buttons and contents
+    tabButtons.forEach(btn => btn.classList.remove("active"));
+    tabContents.forEach(content => content.classList.remove("active"));
+
+    // Add active class to clicked button
+    button.classList.add("active");
+
+    // Show corresponding content
+    const tabId = button.getAttribute("data-tab");
+    const content = document.getElementById(`tab-${tabId}`);
+    if (content) {
+      content.classList.add("active");
+    }
+  });
+});
