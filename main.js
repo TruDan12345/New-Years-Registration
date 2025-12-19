@@ -696,7 +696,7 @@ form.addEventListener("submit", async (event) => {
     Number(adultInput.value || 0) * COSTS.adult + Number(childInput.value || 0) * COSTS.child;
 
   // Calculate Stripe fees (2.9% + $0.30)
-  const fees = (subtotal * 0.029) + 0.30;
+  const fees = (subtotal * 0.029) + 0.50;
   const totalCostValue = subtotal + fees;
 
   const payload = {
